@@ -1,0 +1,80 @@
+{
+  "name": "apimodels-ai-sdk-provider",
+  "version": "0.1.0",
+  "description": "apimodels.app provider for the Vercel AI SDK: chat, embedding, image and video models (Claude, GPT, Gemini, Qwen, DeepSeek, GPT Image, Nano Banana, Seedream, Veo, Kling, Seedance) with one API key.",
+  "type": "module",
+  "license": "MIT",
+  "author": "apimodels.app <support@apimodels.app>",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "type-check": "tsc --noEmit",
+    "test": "tsup && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.92",
+    "@ai-sdk/provider": "^4.0.38",
+    "@ai-sdk/provider-utils": "^5.0.81"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.76 || ^4.1.8"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "ai",
+    "ai-sdk",
+    "vercel-ai-sdk",
+    "provider",
+    "apimodels",
+    "llm",
+    "image-generation",
+    "video-generation",
+    "gpt-image",
+    "nano-banana",
+    "veo",
+    "kling",
+    "seedance"
+  ],
+  "homepage": "https://github.com/apimodels/ai-sdk-provider#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apimodels/ai-sdk-provider.git"
+  },
+  "bugs": {
+    "url": "https://github.com/apimodels/ai-sdk-provider/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "ai": "7.0.173",
+    "tsup": "^9.0.0",
+    "typescript": "^6.0.3",
+    "zod": "^4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
