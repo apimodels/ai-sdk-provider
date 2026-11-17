@@ -25,7 +25,8 @@
   "scripts": {
     "build": "tsup",
     "type-check": "tsc --noEmit",
-    "test": "tsup && node --test test/*.test.mjs"
+    "test": "tsup && node --test test/*.test.mjs",
+    "prepublishOnly": "pnpm test"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.92",
