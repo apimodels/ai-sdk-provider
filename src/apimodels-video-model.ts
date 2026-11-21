@@ -39,6 +39,33 @@ const FIRST_FRAME_AS_IMAGE = new Set([
   'wan-animate',
 ]);
 
+/**
+ * Video models whose route takes the first frame ONLY from `first_frame_url` and reads images[] as reference
+ * images (checked against the apimodels backend, 2026-11-21). Sending images[] to them silently turned
+ * image-to-video into reference-to-video; the two Wan Spicy image-to-video models received no image at all.
+ * seedance-2.5-lite has no first-frame mode, so it answers first_frame_url with a clear 400.
+ * Compared after normalizing "4-0" to "4.0", so alias spellings (kling-4-0, seedance-2-0-fast) match too.
+ */
+const FIRST_FRAME_AS_URL = new Set([
+  'seedance-2.0', 'seedance-2.0-fast', 'seedance-2.0-mini', 'seedance-2.5', 'seedance-2.5-lite', 'seedance-2.5-flash',
+  'dreamina-seedance-2.0', 'dreamina-seedance-2.0-fast', 'dreamina-seedance-2.0-mini',
+  'wan-3.0-video', 'kling-4.0', 'kling-4.0-flash', 'ltx-2.5-fast', 'ltx-2.5-pro', 'muse-video', 'gemini-omni-1.2-flash',
+  'flux-3-max', 'wan-2.2-i2v-spicy', 'wan-2.7-i2v-spicy', 'minimax-h3-max-turbo', 'minimax-h3-rh-enhanced',
+]);
+
+/** Which request field carries the first frame for this model. */
+export function firstFrameField(model: string, hasLastFrame: boolean): 'first_frame_url' | 'image' | 'images' | 'input_urls' {
+  const raw = model.trim().toLowerCase();
+  const id = raw.replace(/(\d)-(\d)/g, '$1.$2');
+  if (id.endsWith('motion-control')) return 'input_urls';
+  if (FIRST_FRAME_AS_URL.has(id)) return 'first_frame_url';
+  // MiniMax H3 Lite: first + last frame mode takes both as *_frame_url; with one image its only mode is reference.
+  if (id === 'minimax-h3-lite' && hasLastFrame) return 'first_frame_url';
+  // Published ids here are compared as-is (kling-v2-6 must not become kling-v2.6).
+  if (FIRST_FRAME_AS_IMAGE.has(raw)) return 'image';
+  return 'images';
+}
+
 const RESERVED_KEYS = new Set(['model', 'prompt', 'callback_url']);
 
 /** '1280x720' -> '720p': the API names video resolutions by their short side. */
@@ -120,14 +147,14 @@ export class ApimodelsVideoModel implements VideoModelV4 {
 
     if (firstFrame != null) {
       const url = await upload(firstFrame);
-      if (model.endsWith('motion-control')) body.input_urls = [url];
-      else if (FIRST_FRAME_AS_IMAGE.has(model)) body.image = url;
-      else body.images = [url];
+      const field = firstFrameField(model, lastFrame != null);
+      if (field === 'images' || field === 'input_urls') body[field] = [url];
+      else body[field] = url;
     }
 
     if (lastFrame != null) {
       const url = await upload(lastFrame);
-      // Seedance, MiniMax and Vidu read last_frame_url; Kling and v3.1-fast-start-end read image_tail.
+      // Seedance, MiniMax, Kling 4.0 and Muse read last_frame_url; Kling 2.x and v3.1-fast-start-end read image_tail.
       body.last_frame_url = url;
       body.image_tail = url;
     }

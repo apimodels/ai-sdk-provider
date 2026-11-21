@@ -7,7 +7,7 @@ This package lets you use those models with the [Vercel AI SDK](https://ai-sdk.d
 - **Chat** with `generateText` / `streamText`: Claude, GPT, Gemini, Qwen, DeepSeek, GLM and Grok, with tool calling and image input
 - **Embeddings** with `embed` / `embedMany`
 - **Images** with `generateImage`: GPT Image 2, Nano Banana 2.1, Gemini 3 Pro Image, Seedream, Qwen Image, FLUX.2 Klein, Grok Imagine and more, including edits from reference images
-- **Video** with `experimental_generateVideo`: Veo 3.1, Kling 4.0, Seedance 2.5, Wan 3.0, MiniMax H3, Vidu Q4 and more, from text, a first frame, first and last frames, or reference images
+- **Video** with `experimental_generateVideo`: Veo 3.1, Kling 4.0, Seedance 2.5, Wan 3.0, MiniMax H3, LTX 2.5 and more, from text, a first frame, first and last frames, or reference images
 
 ## Setup
 

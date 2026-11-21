@@ -62,6 +62,5 @@ export type ApimodelsVideoModelId =
   | 'minimax-h3'
   | 'minimax-h3-lite'
   | 'grok-imagine-video-1.5'
-  | 'vidu-q4'
   | 'ltx-2.3'
   | (string & {});

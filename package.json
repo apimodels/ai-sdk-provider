@@ -1,6 +1,6 @@
 {
   "name": "apimodels-ai-sdk-provider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "apimodels.app provider for the Vercel AI SDK: chat, embedding, image and video models (Claude, GPT, Gemini, Qwen, DeepSeek, GPT Image, Nano Banana, Seedream, Veo, Kling, Seedance) with one API key.",
   "type": "module",
   "license": "MIT",

@@ -145,7 +145,8 @@ test('experimental_generateVideo starts a task, polls doStatus and maps the firs
   });
 
   const submit = calls[0];
-  assert.deepEqual(submit.body.images, ['https://example.com/first.png']);
+  assert.equal(submit.body.first_frame_url, 'https://example.com/first.png', 'Seedance reads the first frame only from first_frame_url');
+  assert.equal(submit.body.images, undefined, 'images[] would make Seedance treat it as a reference image');
   assert.equal(submit.body.resolution, '720p');
   assert.equal(submit.body.duration, 5);
   assert.equal(submit.body.generate_audio, false);
@@ -175,6 +176,38 @@ test('Kling video models get the first frame as `image` and the last frame as im
   assert.equal(submit.body.image, 'https://example.com/a.png');
   assert.equal(submit.body.image_tail, 'https://example.com/b.png');
   assert.equal(submit.body.aspect_ratio, '9:16');
+});
+
+test('each video model gets the first frame in the field its route reads (2026-11-21)', async () => {
+  const { fetch, calls } = mockFetch([
+    [c => c.method === 'POST', () => json({ code: 200, data: { taskId: 'vid_ff' } })],
+    [c => c.method === 'GET', c =>
+      c.url.startsWith('https://r2.') ? new Response(MP4) : json({ code: 200, data: { state: 'completed', resultUrls: ['https://r2.apimodels.app/results/f.mp4'] } })],
+  ]);
+  const run = async (id, frames) => {
+    calls.length = 0;
+    await experimental_generateVideo({ model: provider(fetch).video(id), prompt: 'p', frameImages: frames, poll: { intervalMs: 1 }, download });
+    return calls.find(c => c.method === 'POST').body;
+  };
+  const first = [{ image: 'https://example.com/a.png', frameType: 'first_frame' }];
+  const both = [...first, { image: 'https://example.com/z.png', frameType: 'last_frame' }];
+  for (const id of ['seedance-2.0-fast', 'seedance-2-0-fast', 'kling-4.0', 'kling-4-0', 'kling-4.0-flash', 'seedance-2.5-flash', 'wan-3.0-video', 'muse-video', 'gemini-omni-1.2-flash', 'wan-2.2-i2v-spicy']) {
+    const b = await run(id, first);
+    assert.equal(b.first_frame_url, 'https://example.com/a.png', id);
+    assert.equal(b.images, undefined, id);
+  }
+  for (const id of ['omnihuman-2.0', 'minimax-h3', 'veo-3.1-fast-fhd', 'ltx-2.3']) {
+    const b = await run(id, first);
+    assert.deepEqual(b.images, ['https://example.com/a.png'], id);
+    assert.equal(b.first_frame_url, undefined, id);
+  }
+  let b = await run('minimax-h3-lite', first);
+  assert.deepEqual(b.images, ['https://example.com/a.png'], 'H3 Lite with one image: reference mode');
+  b = await run('minimax-h3-lite', both);
+  assert.equal(b.first_frame_url, 'https://example.com/a.png', 'H3 Lite first + last frame');
+  assert.equal(b.last_frame_url, 'https://example.com/z.png');
+  b = await run('kling-v2-6', first);
+  assert.equal(b.image, 'https://example.com/a.png', 'kling-v2-6 still reads the scalar image');
 });
 
 test('a failed video task rejects with the API reason', async () => {
